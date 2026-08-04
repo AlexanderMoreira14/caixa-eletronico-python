@@ -1,0 +1,22 @@
+[
+    {
+        "login": "ARISTON",
+        "senha": "123",
+        "historico": [],
+        "saldo": 10000
+    },
+    {
+        "login": "DAVIZAO",
+        "senha": "0123",
+        "historico": [],
+        "saldo": 10000
+    },
+    {
+        "login": "ALEK",
+        "senha": "1230",
+        "historico": [
+            "11:42 em 03/08/2026\nSaque: 1000.00"
+        ],
+        "saldo": 9000.0
+    }
+]

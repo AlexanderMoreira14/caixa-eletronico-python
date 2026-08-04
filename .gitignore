@@ -1,0 +1,4 @@
+usuarios.json
+__pycache__/
+*.pyc
+.vscode/
