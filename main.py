@@ -52,7 +52,7 @@ def realizar_login():
                 return True
         else:
             print(f"Login ou senha incorretos. Tentativas restantes: {3 - tentativas}")                       
-    print("Conta bloqueada MANO VEIO IMBECIL.")
+    print("Conta bloqueada.")
     return False
 
 def realizar_menu():
@@ -170,7 +170,7 @@ if realizar_login():
             realizar_pix()
         elif escolha == "5":
             if not trocar_usuario():
-                print("Muito burro. Encerrando o programa.")
+                print("Encerrando o programa.")
                 break
         elif escolha == "6":
             realizar_sair()
