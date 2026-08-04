@@ -5,7 +5,7 @@ Sistema bancário desenvolvido em dupla para praticar lógica de programação e
 ## Desenvolvedores
 
 - Alexander Moreira — [@AlexanderMoreira14]
-- Nome do amigo — [@donnyeram]
+- Davi Ramos — [@donnyeram]
 
 ## Funcionalidades
 
