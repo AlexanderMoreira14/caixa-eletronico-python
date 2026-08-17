@@ -84,7 +84,7 @@ def realizar_saque():
         
     else:
         print("Saldo insuficiente ou valor inválido.")
-        return realizar_saque()
+        return
 
 def realizar_deposito():
     hora_atual = datetime.now()
@@ -104,7 +104,7 @@ def realizar_deposito():
         print("Valor inválido.")
 
 def realizar_extrato():
-    print("\n------ Extrato ------")
+    print(f"\n------ Extrato de {usuario_logado ["login"]} ------")
     if not usuario_logado["historico"]:
         print("Nenhuma operação realizada.")
     else: 
@@ -175,11 +175,10 @@ def cadastrar_usuario():
             "saldo": 0
         }
 
-    
     usuarios.append(usuarios_novos)
     salvar_dados()
     print(f"Usuário {cadastro_novo} cadastrado com sucesso!")
-    return realizar_menu()
+    return realizar_login()
 
 
 if realizar_login():
@@ -200,11 +199,9 @@ if realizar_login():
         elif escolha == "6":
             cadastrar_usuario()
         elif escolha == "7":
-            realizar_sair()
-            break
-        elif escolha == "8":
             consultar_saldo()
-        elif escolha == "9":
+        elif escolha == "8":
+            realizar_sair()
             print("Encerrando o programa.")
             break
         else:
