@@ -23,6 +23,7 @@ usuarios_padrao = [
     }
 ]
 
+
 def carregar_usuarios():
     try:
         with open("usuarios.json", "r", encoding="utf-8") as arquivo:
@@ -62,8 +63,9 @@ def realizar_menu():
     print("3 - Extrato")
     print("4 - PIX")
     print("5 - Trocar de Usuário")
-    print("6 - Sair")
+    print("6 - Cadastrar novo usuário")
     print("7 - Saldo")
+    print("8 - Sair do programa")
     return input("Escolha uma opção: ")
     
 def realizar_saque():
@@ -140,7 +142,7 @@ def realizar_pix():
                 print("Saldo insuficiente ou valor inválido.")
                 return
             
-        print("Este usuário não existe")
+    print("Este usuário não existe")
         
 def consultar_saldo():
     print(f"Seu saldo atual é de R$ {usuario_logado['saldo']:.2f}")
@@ -155,6 +157,29 @@ def trocar_usuario():
 
 def realizar_sair():
     print("Você saiu do caixa. Até logo!")
+
+def cadastrar_usuario():
+    
+    cadastro_novo = input("Digite novo usuário:").upper().strip()
+    for usuario in usuarios:
+     if cadastro_novo == usuario["login"]:
+        print("Usuário já existe.")
+        return
+    
+    cadastro_senha = input("Digite a senha do novo usuário:")
+
+    usuarios_novos = {
+            "login": cadastro_novo,
+            "senha": cadastro_senha,
+            "historico": [],
+            "saldo": 0
+        }
+
+    
+    usuarios.append(usuarios_novos)
+    salvar_dados()
+    print(f"Usuário {cadastro_novo} cadastrado com sucesso!")
+    return realizar_menu()
 
 
 if realizar_login():
@@ -173,9 +198,14 @@ if realizar_login():
                 print("Encerrando o programa.")
                 break
         elif escolha == "6":
+            cadastrar_usuario()
+        elif escolha == "7":
             realizar_sair()
             break
-        elif escolha == "7":
+        elif escolha == "8":
             consultar_saldo()
+        elif escolha == "9":
+            print("Encerrando o programa.")
+            break
         else:
             print("Opção inválida.")
