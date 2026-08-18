@@ -65,7 +65,8 @@ def realizar_menu():
     print("5 - Trocar de Usuário")
     print("6 - Cadastrar novo usuário")
     print("7 - Saldo")
-    print("8 - Sair do programa")
+    print("8 - Excluir usuário")
+    print("9 - Sair do programa")
     return input("Escolha uma opção: ")
     
 def realizar_saque():
@@ -104,7 +105,7 @@ def realizar_deposito():
         print("Valor inválido.")
 
 def realizar_extrato():
-    print(f"\n------ Extrato de {usuario_logado ["login"]} ------")
+    print(f"\n------ Extrato de {usuario_logado ['login']} ------")
     if not usuario_logado["historico"]:
         print("Nenhuma operação realizada.")
     else: 
@@ -180,6 +181,29 @@ def cadastrar_usuario():
     print(f"Usuário {cadastro_novo} cadastrado com sucesso!")
     return realizar_login()
 
+def excluir_usuario():
+    global usuario_logado
+    confirmacao = input(f"Tem certeza que deseja excluir o usuário {usuario_logado['login']}?\n Digite apenas SIM ou NÃO: ").upper()
+    if confirmacao == "SIM":
+        tentativas = 0
+        while tentativas < 3:
+            tentativas += 1
+            senha_confirmacao = input("Digite a senha do usuário para confirmar a exclusão: ")
+            if senha_confirmacao == usuario_logado['senha']:
+                usuarios.remove(usuario_logado)
+                salvar_dados()
+                print(f"Usuário {usuario_logado['login']} excluído com sucesso.")
+                usuario_logado = None
+                return realizar_login()
+            else:
+                print(f"Senha incorreta. Tentativas restantes: {3 - tentativas}")
+                if tentativas == 3:
+                    print("Número máximo de tentativas atingido. Exclusão cancelada.")
+                    return
+    else:
+        print("Exclusão cancelada.")
+        return
+
 
 if realizar_login():
     while True:
@@ -201,6 +225,8 @@ if realizar_login():
         elif escolha == "7":
             consultar_saldo()
         elif escolha == "8":
+            excluir_usuario()
+        elif escolha == "9":
             realizar_sair()
             print("Encerrando o programa.")
             break
