@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+import os
 
 
 usuarios_padrao = [
@@ -23,7 +24,28 @@ usuarios_padrao = [
     }
 ]
 
+def limpar_terminal():
+    os.system("cls")
+    
+def ler_valor(mensagem):
+    while True:
+        entrada = input(mensagem)
+        
+        if entrada.upper() == "SAIR":
+            return None
+        
+        try:
+            valor = float(entrada)
 
+            if valor > 0:
+                return valor
+
+            print("O valor precisa ser maior que zero.")
+
+        except ValueError:
+            print("Digite um número válido ou SAIR.")
+    
+    
 def carregar_usuarios():
     try:
         with open("usuarios.json", "r", encoding="utf-8") as arquivo:
@@ -64,19 +86,20 @@ def realizar_menu():
     print("4 - PIX")
     print("5 - Trocar de Usuário")
     print("6 - Cadastrar novo usuário")
-    print("7 - Saldo")
+    print("7 - Consultar Saldo")
     print("8 - Excluir usuário")
     print("9 - Sair do programa")
     return input("Escolha uma opção: ")
     
 def realizar_saque():
     hora_atual = datetime.now()
-    try:
-        saque = float(input("Digite o valor do saque: "))
-    except ValueError:
-        print("Valor inválido. Por favor, digite um número.")
-        return realizar_saque()
-    if saque > 0 and saque <= usuario_logado['saldo']:
+    limpar_terminal()
+    
+    saque = ler_valor("Digite o valor do saque ou SAIR para voltar: ")
+    if saque is None:
+        return
+    
+    if saque <= usuario_logado['saldo']:
         usuario_logado["saldo"] -= saque
         usuario_logado["historico"].append(f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nSaque: {saque:.2f}")
         salvar_dados()
@@ -89,11 +112,12 @@ def realizar_saque():
 
 def realizar_deposito():
     hora_atual = datetime.now()
-    try:
-        deposito = float(input("Digite o valor do depósito: "))
-    except ValueError:
-        print("Valor inválido. Por favor, digite um número.")
-        return realizar_deposito()
+    limpar_terminal()
+
+    deposito = ler_valor("Digite o valor do deposito ou SAIR para voltar: ")
+    if deposito is None:
+        return
+    
     if deposito > 0:
         usuario_logado["saldo"] += deposito
         usuario_logado["historico"].append(f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nDepósito: +R$ {deposito:.2f}")
@@ -105,6 +129,7 @@ def realizar_deposito():
         print("Valor inválido.")
 
 def realizar_extrato():
+    limpar_terminal()
     print(f"\n------ Extrato de {usuario_logado ['login']} ------")
     if not usuario_logado["historico"]:
         print("Nenhuma operação realizada.")
@@ -116,13 +141,12 @@ def realizar_extrato():
 
 def realizar_pix():
     hora_atual = datetime.now()
-    destino = input("Digite o login do usuário para transferir: ")
-    try:
-        valor = float(input("Digite o valor da transferência: "))
-    except ValueError:
-        print("Valor inválido. Por favor, digite um número.")
-        return realizar_pix()
-    
+    limpar_terminal()
+    destino = input("Digite SAIR para voltar ou \nDigite o login do usuário para transferir: ")
+    if destino.upper() == "SAIR":
+        return
+    valor = float (input("Digite o valor do pix: "))
+ 
     for usuario in usuarios:
         if usuario["login"] == destino.upper():
             
@@ -146,6 +170,7 @@ def realizar_pix():
     print("Este usuário não existe")
         
 def consultar_saldo():
+    limpar_terminal()
     print(f"Seu saldo atual é de R$ {usuario_logado['saldo']:.2f}")
     
 def trocar_usuario():
@@ -157,11 +182,15 @@ def trocar_usuario():
         return False
 
 def realizar_sair():
+    limpar_terminal()
     print("Você saiu do caixa. Até logo!")
 
 def cadastrar_usuario():
+    limpar_terminal()
+    cadastro_novo = input("Digite SAIR para voltar. \nDigite novo usuário: ").upper().strip()
+    if cadastro_novo == "SAIR":
+        return
     
-    cadastro_novo = input("Digite novo usuário:").upper().strip()
     for usuario in usuarios:
      if cadastro_novo == usuario["login"]:
         print("Usuário já existe.")
@@ -183,6 +212,7 @@ def cadastrar_usuario():
 
 def excluir_usuario():
     global usuario_logado
+    limpar_terminal()
     confirmacao = input(f"Tem certeza que deseja excluir o usuário {usuario_logado['login']}?\n Digite apenas SIM ou NÃO: ").upper()
     if confirmacao == "SIM":
         tentativas = 0
