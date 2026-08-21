@@ -88,7 +88,8 @@ def realizar_menu():
     print("6 - Cadastrar novo usuário")
     print("7 - Consultar Saldo")
     print("8 - Excluir usuário")
-    print("9 - Sair do programa")
+    print("9 - Alterar senha")
+    print("10 - Sair do programa")
     return input("Escolha uma opção: ")
     
 def realizar_saque():
@@ -234,31 +235,48 @@ def excluir_usuario():
         print("Exclusão cancelada.")
         return
 
+def alterar_senha():
+    senha_atual = input("Digite a senha atual: ")
+    if senha_atual == usuario_logado['senha']:
+        senha_nova = input("Digite a nova senha: ")
+        usuario_logado['senha'] = senha_nova
+        salvar_dados()
+        print("Senha alterada com sucesso.")
+    else:
+        print("Senha incorreta.")
+
+
 
 if realizar_login():
     while True:
+
         escolha = realizar_menu()
-        if escolha == "1":
-            realizar_saque()
-        elif escolha == "2":
-            realizar_deposito()
-        elif escolha == "3":
-            realizar_extrato()
-        elif escolha == "4":
-            realizar_pix()
-        elif escolha == "5":
-            if not trocar_usuario():
+
+        match escolha:
+
+            case "1":
+                realizar_saque()
+            case "2":
+                realizar_deposito()
+            case "3":
+                realizar_extrato()
+            case "4":
+                realizar_pix()
+            case "5":
+                if not trocar_usuario():
+                    print("Encerrando o programa.")
+                break
+            case "6":
+                cadastrar_usuario()
+            case "7":
+                consultar_saldo()
+            case "8":
+                excluir_usuario()
+            case "9":
+                alterar_senha()
+            case "10":
+                realizar_sair()
                 print("Encerrando o programa.")
                 break
-        elif escolha == "6":
-            cadastrar_usuario()
-        elif escolha == "7":
-            consultar_saldo()
-        elif escolha == "8":
-            excluir_usuario()
-        elif escolha == "9":
-            realizar_sair()
-            print("Encerrando o programa.")
-            break
-        else:
-            print("Opção inválida.")
+            case _:
+                print("Opção inválida.")
