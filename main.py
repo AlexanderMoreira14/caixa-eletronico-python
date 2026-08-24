@@ -178,7 +178,7 @@ def trocar_usuario():
     global usuario_logado
     usuario_logado = None
     if realizar_login():
-        return True
+        return realizar_menu()
     else:
         return False
 
@@ -240,8 +240,13 @@ def alterar_senha():
     if senha_atual == usuario_logado['senha']:
         senha_nova = input("Digite a nova senha: ")
         usuario_logado['senha'] = senha_nova
-        salvar_dados()
-        print("Senha alterada com sucesso.")
+        confirmar_senha = input("Confirme a nova senha: ")
+        if confirmar_senha == senha_nova:
+            salvar_dados()
+            print("Senha alterada com sucesso.")
+        else:
+            print("Senhas diferentes")   
+        return alterar_senha() 
     else:
         print("Senha incorreta.")
 
@@ -265,7 +270,7 @@ if realizar_login():
             case "5":
                 if not trocar_usuario():
                     print("Encerrando o programa.")
-                break
+                    break
             case "6":
                 cadastrar_usuario()
             case "7":
