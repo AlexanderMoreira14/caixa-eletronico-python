@@ -1,82 +1,9 @@
 from datetime import datetime
-import json
-import os
+from Modulos.dados import usuarios, salvar_dados
+from Modulos.utilidades import limpar_terminal, ler_valor
+from Modulos.usuarios import (realizar_login, trocar_usuario,cadastrar_usuario, excluir_usuario, alterar_senha)
 
 
-usuarios_padrao = [
-    {
-        "login": "ARISTON",
-        "senha": "123",
-        "historico": [],
-        "saldo": 10000
-    },
-    {
-        "login": "DAVIZAO",
-        "senha": "0123",
-        "historico": [],
-        "saldo": 10000
-    },
-    {
-        "login": "ALEK",
-        "senha": "1230",
-        "historico": [],
-        "saldo": 10000
-    }
-]
-
-def limpar_terminal():
-    os.system("cls")
-    
-def ler_valor(mensagem):
-    while True:
-        entrada = input(mensagem)
-        
-        if entrada.upper() == "SAIR":
-            return None
-        
-        try:
-            valor = float(entrada)
-
-            if valor > 0:
-                return valor
-
-            print("O valor precisa ser maior que zero.")
-
-        except ValueError:
-            print("Digite um número válido ou SAIR.")
-    
-    
-def carregar_usuarios():
-    try:
-        with open("usuarios.json", "r", encoding="utf-8") as arquivo:
-            return json.load(arquivo)
-    except FileNotFoundError:
-        return usuarios_padrao
-
-def salvar_dados():
-    with open("usuarios.json", "w", encoding="utf-8") as arquivo:
-        json.dump(usuarios, arquivo, indent=4, ensure_ascii=False)
-
-usuarios = carregar_usuarios()
-usuario_logado = None
-    
-def realizar_login():
-    global usuario_logado
-    tentativas = 0
-    while tentativas < 3:
-        tentativas += 1
-        login_input = input("Digite o seu login: ")
-        senha_input = input("Digite a sua senha: ")
-        
-        for usuario in usuarios:
-            if login_input.upper() == usuario["login"] and senha_input == usuario["senha"]:
-                usuario_logado = usuario
-                print(f"\nBem-vindo, {usuario['login']}!")
-                return True
-        else:
-            print(f"Login ou senha incorretos. Tentativas restantes: {3 - tentativas}")                       
-    print("Conta bloqueada.")
-    return False
 
 def realizar_menu():
     print("\n---- MENU BANCO ----")
@@ -173,86 +100,13 @@ def realizar_pix():
 def consultar_saldo():
     limpar_terminal()
     print(f"Seu saldo atual é de R$ {usuario_logado['saldo']:.2f}")
-    
-def trocar_usuario():
-    global usuario_logado
-    usuario_logado = None
-    if realizar_login():
-        return realizar_menu()
-    else:
-        return False
 
 def realizar_sair():
     limpar_terminal()
     print("Você saiu do caixa. Até logo!")
 
-def cadastrar_usuario():
-    limpar_terminal()
-    cadastro_novo = input("Digite SAIR para voltar. \nDigite novo usuário: ").upper().strip()
-    if cadastro_novo == "SAIR":
-        return
-    
-    for usuario in usuarios:
-     if cadastro_novo == usuario["login"]:
-        print("Usuário já existe.")
-        return
-    
-    cadastro_senha = input("Digite a senha do novo usuário:")
-
-    usuarios_novos = {
-            "login": cadastro_novo,
-            "senha": cadastro_senha,
-            "historico": [],
-            "saldo": 0
-        }
-
-    usuarios.append(usuarios_novos)
-    salvar_dados()
-    print(f"Usuário {cadastro_novo} cadastrado com sucesso!")
-    return realizar_login()
-
-def excluir_usuario():
-    global usuario_logado
-    limpar_terminal()
-    confirmacao = input(f"Tem certeza que deseja excluir o usuário {usuario_logado['login']}?\n Digite apenas SIM ou NÃO: ").upper()
-    if confirmacao == "SIM":
-        tentativas = 0
-        while tentativas < 3:
-            tentativas += 1
-            senha_confirmacao = input("Digite a senha do usuário para confirmar a exclusão: ")
-            if senha_confirmacao == usuario_logado['senha']:
-                usuarios.remove(usuario_logado)
-                salvar_dados()
-                print(f"Usuário {usuario_logado['login']} excluído com sucesso.")
-                usuario_logado = None
-                return realizar_login()
-            else:
-                print(f"Senha incorreta. Tentativas restantes: {3 - tentativas}")
-                if tentativas == 3:
-                    print("Número máximo de tentativas atingido. Exclusão cancelada.")
-                    return
-    else:
-        print("Exclusão cancelada.")
-        return
-
-def alterar_senha():
-    senha_atual = input("Digite a senha atual: ")
-    if senha_atual == usuario_logado['senha']:
-        senha_nova = input("Digite a nova senha: ")
-        usuario_logado['senha'] = senha_nova
-        confirmar_senha = input("Confirme a nova senha: ")
-        if confirmar_senha == senha_nova:
-            salvar_dados()
-            print("Senha alterada com sucesso.")
-        else:
-            print("Senhas diferentes")   
-        return alterar_senha() 
-    else:
-        print("Senha incorreta.")
-
-
-
-if realizar_login():
+usuario_logado = realizar_login()
+if usuario_logado:
     while True:
 
         escolha = realizar_menu()
@@ -268,17 +122,23 @@ if realizar_login():
             case "4":
                 realizar_pix()
             case "5":
-                if not trocar_usuario():
-                    print("Encerrando o programa.")
-                    break
+                novo_usuario = trocar_usuario()
+                if novo_usuario:
+                    usuario_logado = novo_usuario
+                else:
+                    print("Não foi possível trocar de usuário. Encerrando o programa.")
+    
             case "6":
-                cadastrar_usuario()
+                usuario_atualizado = cadastrar_usuario()
+                if usuario_atualizado:
+                    usuario_logado = usuario_atualizado
             case "7":
                 consultar_saldo()
             case "8":
-                excluir_usuario()
+                if excluir_usuario(usuario_logado):
+                    usuario_logado = realizar_login()
             case "9":
-                alterar_senha()
+                alterar_senha(usuario_logado)
             case "10":
                 realizar_sair()
                 print("Encerrando o programa.")
