@@ -2,7 +2,7 @@ from datetime import datetime
 from Modulos.dados import usuarios, salvar_dados
 from Modulos.utilidades import limpar_terminal, ler_valor
 from Modulos.usuarios import (realizar_login, trocar_usuario,cadastrar_usuario, excluir_usuario, alterar_senha)
-
+from Modulos.operacoes import (realizar_saque, realizar_deposito, realizar_extrato, realizar_pix, consultar_saldo)
 
 
 def realizar_menu():
@@ -19,88 +19,6 @@ def realizar_menu():
     print("10 - Sair do programa")
     return input("Escolha uma opção: ")
     
-def realizar_saque():
-    hora_atual = datetime.now()
-    limpar_terminal()
-    
-    saque = ler_valor("Digite o valor do saque ou SAIR para voltar: ")
-    if saque is None:
-        return
-    
-    if saque <= usuario_logado['saldo']:
-        usuario_logado["saldo"] -= saque
-        usuario_logado["historico"].append(f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nSaque: {saque:.2f}")
-        salvar_dados()
-        print(f"O saque no valor de R$ {saque:.2f} foi realizado")
-        print(f"Seu saldo atual é de R$ {usuario_logado['saldo']:.2f}")
-        
-    else:
-        print("Saldo insuficiente ou valor inválido.")
-        return
-
-def realizar_deposito():
-    hora_atual = datetime.now()
-    limpar_terminal()
-
-    deposito = ler_valor("Digite o valor do deposito ou SAIR para voltar: ")
-    if deposito is None:
-        return
-    
-    if deposito > 0:
-        usuario_logado["saldo"] += deposito
-        usuario_logado["historico"].append(f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nDepósito: +R$ {deposito:.2f}")
-        salvar_dados()
-        print(f"O depósito no valor de R$ {deposito:.2f} foi feito com sucesso")
-        print(f"Seu saldo atual é de R$ {usuario_logado['saldo']:.2f}")
-        
-    else:
-        print("Valor inválido.")
-
-def realizar_extrato():
-    limpar_terminal()
-    print(f"\n------ Extrato de {usuario_logado ['login']} ------")
-    if not usuario_logado["historico"]:
-        print("Nenhuma operação realizada.")
-    else: 
-        for operacao in usuario_logado["historico"]:
-            print(operacao)    
-    print(f"Saldo: -R$ {usuario_logado['saldo']:.2f}")
-    print("=======================")
-
-def realizar_pix():
-    hora_atual = datetime.now()
-    limpar_terminal()
-    destino = input("Digite SAIR para voltar ou \nDigite o login do usuário para transferir: ")
-    if destino.upper() == "SAIR":
-        return
-    valor = float (input("Digite o valor do pix: "))
- 
-    for usuario in usuarios:
-        if usuario["login"] == destino.upper():
-            
-            if usuario == usuario_logado:
-                print ("Você não pode fazer PIX para a própria conta.")
-                return
-            
-            if valor > 0 and valor <= usuario_logado["saldo"]:
-                usuario_logado["saldo"] -= valor
-                usuario["saldo"] += valor
-                usuario_logado["historico"].append(f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nTransferência realizada para {destino.upper()}: -R$ {valor:.2f}")
-                usuario["historico"].append(f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nTransferência recebida de {usuario_logado['login']}: +R$ {valor:.2f}")
-                salvar_dados()
-                print(f"Transferência de R$ {valor:.2f} para {destino.upper()} realizada com sucesso.")
-                return
-            
-            else:
-                print("Saldo insuficiente ou valor inválido.")
-                return
-            
-    print("Este usuário não existe")
-        
-def consultar_saldo():
-    limpar_terminal()
-    print(f"Seu saldo atual é de R$ {usuario_logado['saldo']:.2f}")
-
 def realizar_sair():
     limpar_terminal()
     print("Você saiu do caixa. Até logo!")
@@ -114,13 +32,13 @@ if usuario_logado:
         match escolha:
 
             case "1":
-                realizar_saque()
+                realizar_saque(usuario_logado)
             case "2":
-                realizar_deposito()
+                realizar_deposito(usuario_logado)
             case "3":
-                realizar_extrato()
+                realizar_extrato(usuario_logado)
             case "4":
-                realizar_pix()
+                realizar_pix(usuario_logado)
             case "5":
                 novo_usuario = trocar_usuario()
                 if novo_usuario:
@@ -133,7 +51,7 @@ if usuario_logado:
                 if usuario_atualizado:
                     usuario_logado = usuario_atualizado
             case "7":
-                consultar_saldo()
+                consultar_saldo(usuario_logado)
             case "8":
                 if excluir_usuario(usuario_logado):
                     usuario_logado = realizar_login()
