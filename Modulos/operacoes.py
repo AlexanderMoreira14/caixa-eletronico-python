@@ -1,6 +1,6 @@
 from datetime import datetime
 from Modulos.utilidades import limpar_terminal, ler_valor
-from Modulos.dados import salvar_dados, usuario_logado, usuarios
+from Modulos.dados import usuarios, salvar_dados, registrar_historico, carregar_historico
 
 def realizar_saque(usuario):
     hora_atual = datetime.now()
@@ -12,7 +12,8 @@ def realizar_saque(usuario):
     
     if saque <= usuario['saldo']:
         usuario["saldo"] -= saque
-        usuario["historico"].append(f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nSaque: {saque:.2f}")
+        mensagem = f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nDepósito: +R$ {saque:.2f}"
+        registrar_historico(usuario['login'], mensagem)
         salvar_dados()
         print(f"O saque no valor de R$ {saque:.2f} foi realizado")
         print(f"Seu saldo atual é de R$ {usuario['saldo']:.2f}")
@@ -31,7 +32,8 @@ def realizar_deposito(usuario):
     
     if deposito > 0:
         usuario["saldo"] += deposito
-        usuario["historico"].append(f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nDepósito: +R$ {deposito:.2f}")
+        mensagem = f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nDepósito: +R$ {deposito:.2f}"
+        registrar_historico(usuario['login'], mensagem)
         salvar_dados()
         print(f"O depósito no valor de R$ {deposito:.2f} foi feito com sucesso")
         print(f"Seu saldo atual é de R$ {usuario['saldo']:.2f}")
@@ -42,14 +44,17 @@ def realizar_deposito(usuario):
 def realizar_extrato(usuario):
     limpar_terminal()
     print(f"\n------ Extrato de {usuario ['login']} ------")
-    if not usuario["historico"]:
+    historico_banco = carregar_historico(usuario['login'])
+    
+    if not historico_banco:
         print("Nenhuma operação realizada.")
     else: 
-        for operacao in usuario["historico"]:
+        for operacao in historico_banco:
             print(operacao)    
-    print(f"Saldo: -R$ {usuario['saldo']:.2f}")
+            
+    print(f"Saldo: R$ {usuario['saldo']:.2f}")
     print("=======================")
-
+    
 def realizar_pix(usuario):
     hora_atual = datetime.now()
     limpar_terminal()
@@ -61,15 +66,20 @@ def realizar_pix(usuario):
     for usuario_destino in usuarios:
         if usuario_destino["login"] == destino.upper():
             
-            if usuario_destino == usuario_logado:
+            if usuario_destino == usuario:
                 print ("Você não pode fazer PIX para a própria conta.")
                 return
             
-            if valor > 0 and valor <= usuario_logado["saldo"]:
+            if valor > 0 and valor <= usuario["saldo"]:
                 usuario["saldo"] -= valor
                 usuario_destino["saldo"] += valor
-                usuario["historico"].append(f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nTransferência realizada para {destino.upper()}: -R$ {valor:.2f}")
-                usuario_destino["historico"].append(f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nTransferência recebida de {usuario['login']}: +R$ {valor:.2f}")
+                
+                mensagem_saida = f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nTransferência realizada para {destino.upper()}: -R$ {valor:.2f}"
+                registrar_historico(usuario['login'], mensagem_saida)
+                
+                mensagem_entrada = f"{hora_atual.strftime('%H:%M em %d/%m/%Y')}\nTransferência recebida de {usuario['login']}: +R$ {valor:.2f}"
+                registrar_historico(usuario_destino['login'], mensagem_entrada)
+                
                 salvar_dados()
                 print(f"Transferência de R$ {valor:.2f} para {destino.upper()} realizada com sucesso.")
                 return
