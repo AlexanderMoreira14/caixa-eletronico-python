@@ -57,7 +57,6 @@ def registrar_historico(login_usuario, registro):
     conexao = conectar()
     cursor = conexao.cursor()
     
-    # Inserimos a transação na tabela, ligando-a ao login do utilizador
     cursor.execute('''
         INSERT INTO historico (login_usuario, registro)
         VALUES (?, ?)
@@ -70,12 +69,10 @@ def carregar_historico(login_usuario):
     conexao = conectar()
     cursor = conexao.cursor()
     
-    # Busca apenas os registos ONDE o login for igual ao do utilizador logado
     cursor.execute("SELECT registro FROM historico WHERE login_usuario = ?", (login_usuario,))
     linhas = cursor.fetchall()
     conexao.close()
     
-    # Transforma o resultado do banco numa lista normal do Python
     lista_historico = []
     for linha in linhas:
         lista_historico.append(linha[0])
@@ -99,3 +96,36 @@ def salvar_dados():
 inicializar_banco()
 usuarios = carregar_usuarios()
 usuario_logado = None
+
+def registrar_novo_usuario(login, senha):
+    conexao = conectar()
+    cursor = conexao.cursor()
+    
+    cursor.execute('''
+                  INSERT INTO usuarios (login, senha, saldo)
+                  VALUES (?, ?, 0)
+                  ''', (login, senha))
+    conexao.commit()
+    conexao.close() 
+    
+def remover_usuario_banco(login):
+    conexao = conectar()
+    cursor = conexao.cursor()
+    
+    cursor.execute("DELETE FROM historico WHERE login_usuario = ?", (login,))
+    cursor.execute("DELETE FROM usuarios WHERE login = ?", (login,)) 
+
+    conexao.commit()
+    conexao.close()
+    
+def atualizar_senha_banco(login, nova_senha):
+    conexao= conectar()
+    cursor = conexao.cursor()
+    
+    cursor.execute('''
+                    UPDATE usuarios
+                    SET senha = ?
+                    WHERE login = ?
+                    ''', (nova_senha, login))
+    conexao.commit()
+    conexao.close()

@@ -1,6 +1,5 @@
-from Modulos.dados import usuarios, salvar_dados
+from Modulos.dados import usuarios, salvar_dados, registrar_novo_usuario, remover_usuario_banco, atualizar_senha_banco
 from Modulos.utilidades import limpar_terminal, ler_valor
-
 
 def realizar_login():
     tentativas = 0
@@ -44,9 +43,10 @@ def cadastrar_usuario():
             "historico": [],
             "saldo": 0
         }
-
     usuarios.append(usuarios_novos)
-    salvar_dados()
+    
+    registrar_novo_usuario(cadastro_novo, cadastro_senha)
+    
     print(f"Usuário {cadastro_novo} cadastrado com sucesso!")
     return realizar_login()
 
@@ -58,32 +58,39 @@ def excluir_usuario(usuario_logado):
         while tentativas < 3:
             tentativas += 1
             senha_confirmacao = input("Digite a senha do usuário para confirmar a exclusão: ")
+            
             if senha_confirmacao == usuario_logado['senha']:
                 usuarios.remove(usuario_logado)
+                remover_usuario_banco(usuario_logado['login'])
                 salvar_dados()
                 print(f"Usuário {usuario_logado['login']} excluído com sucesso.")
                 usuario_logado = None
                 return True
+            else:   
                 print(f"Senha incorreta. Tentativas restantes: {3 - tentativas}")
-                if tentativas == 3:
-                    print("Número máximo de tentativas atingido. Exclusão cancelada.")
-                    return False
+            if tentativas == 3:
+                print("Número máximo de tentativas atingido. Exclusão cancelada.")
+                return False
     else:
         print("Exclusão cancelada.")
         return False
 
 def alterar_senha(usuario_logado):
     senha_atual = input("Digite a senha atual: ")
+    
     if senha_atual == usuario_logado['senha']:
         senha_nova = input("Digite a nova senha: ")
-        usuario_logado['senha'] = senha_nova
         confirmar_senha = input("Confirme a nova senha: ")
+        
         if confirmar_senha == senha_nova:
-            salvar_dados()
+            usuario_logado['senha'] = senha_nova
+            atualizar_senha_banco(usuario_logado['login'], senha_nova)
             print("Senha alterada com sucesso.")
         else:
-            print("Senhas diferentes")   
+            print("Senhas diferentes. Alteração cancelada")   
         return
     else:
         print("Senha incorreta.")
+        
+
 
